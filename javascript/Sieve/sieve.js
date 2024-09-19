@@ -124,8 +124,86 @@ class Sieve {
           count++;
       }
     }
-    const ret = 2*p+1;
-    return ret;
+    return 2*p+1;
+  }
+
+   /**
+   * This algorithm is a tweaked version (to account for 0-indexing) of the
+   * even-faster-one-whose-code-is-like-mathematical-black-magic that comes from
+   * https://stackoverflow.com/questions/9625663/calculating-and-printing-the-nth-prime-number
+   * @param {number} n - an integer that represents the nth prime to be returned, 0-indexed
+   * @returns {number} - the nth prime
+   */
+   optimizedSieve2(n) {
+    const popCount = (num) => {
+      num -= (num >>> 1) & 0x55555555;
+      num = ((num >>> 2) & 0x33333333) + (num & 0x33333333);
+      num = ((num >> 4) & 0x0F0F0F0F) + (num & 0x0F0F0F0F);
+      return (num * 0x01010101) >> 24;
+    }
+
+    if (n === 0) return 2;
+    if (n === 1) return 3;
+    if (n === 2) return 5;
+    let limit = 2;
+    let root = 2;
+    let count = 2;
+
+    limit = Math.floor(n * (Math.log(n) + Math.log(Math.log(n))) + 3);
+    root = Math.floor(Math.sqrt(limit));
+    switch(limit%6) {
+      case 0:
+          limit = 2*(limit/6) - 1;
+          break;
+      case 5:
+          limit = 2*(limit/6) + 1;
+          break;
+      default:
+          limit = 2*(limit/6);
+    }
+    switch(root%6) {
+      case 0:
+          root = 2*(root/6) - 1;
+          break;
+      case 5:
+          root = 2*(root/6) + 1;
+          break;
+      default:
+          root = 2*(root/6);
+    }
+    const dim = (limit+31) >> 5;
+    const sieve = new Array(dim);
+    for (let i = 0; i < root; i++) {
+      if ((sieve[i >> 5] & (1 << (i&31))) === 0) {
+        let start, s1, s2;
+        if ((i & 1) === 1) {
+          start = i*(3*i+8)+4;
+          s1 = 4*i+5;
+          s2 = 2*i+3;
+        } else {
+          start = i*(3*i+10)+7;
+          s1 = 2*i+3;
+          s2 = 4*i+7;
+        }
+        for(let j = start; j < limit; j += s2) {
+          sieve[j >> 5] |= 1 << (j&31);
+          j += s1;
+          if (j >= limit) break;
+          sieve[j >> 5] |= 1 << (j&31);
+        }
+      }
+    }
+    let k;
+    for(k = 0; count < n+1; k++) {
+      count += popCount(~sieve[k]);
+    }
+    k--;
+    const mask = ~sieve[k];
+    let p;
+    for (p = 31; count >= n+1; p--) {
+      count -= (mask >> p) & 1;
+    }
+    return 3*(p+(k<<5))+7+(p&1);
   }
 
   /**
@@ -134,7 +212,8 @@ class Sieve {
    * @returns {number} - the nth prime
    */
   NthPrime(n) {
-    return this.optimizedSieve(n);
+    return this.optimizedSieve2(n);
+    //return this.optimizedSieve(n); //<-- passes all but the 100mil test
     //return this.segmentedSieve(n)[n]; <-- passes 10mil test only when test is run alone
     //return this.sieveOfEratosthenes(n)[n]; <-- good for 1mil test, but out of mem at 10mil
   }
@@ -153,6 +232,7 @@ const prime10000 = sieve.NthPrime(10000);
 const prime100000 = sieve.NthPrime(100000);
 const prime1mil = sieve.NthPrime(1000000);
 const prime10mil = sieve.NthPrime(10000000);
-console.log(prime0, prime1, prime3, prime8, prime10, prime99, prime500, prime1000, prime10000, prime100000, prime1mil, prime10mil);
+const prime100mil = sieve.NthPrime(100000000);
+console.log(prime0, prime1, prime3, prime8, prime10, prime99, prime500, prime1000, prime10000, prime100000, prime1mil, prime10mil, prime100mil);
 */
 module.exports = Sieve;
