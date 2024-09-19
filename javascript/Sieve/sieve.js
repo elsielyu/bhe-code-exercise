@@ -1,6 +1,7 @@
 class Sieve {
   /**
    * Original Eratosthenes algorithm, good to use for smallish n (n <= 1000000)
+   * reference: https://www.geeksforgeeks.org/sieve-of-eratosthenes/
    * @param {number} n - an integer that represents the nth prime to be returned, 0-indexed
    * @returns {Array[number]} - an array of primes up to the nth prime
    */
@@ -44,6 +45,7 @@ class Sieve {
 
   /**
    * Variant Eratosthenes algorithm, good to use for largish n (n > 1000000)
+   * reference: https://www.geeksforgeeks.org/segmented-sieve/
    * @param {number} n - an integer that represents the nth prime to be returned, 0-indexed
    * @returns {Array[number]} - an array of primes up to the nth prime
    */
